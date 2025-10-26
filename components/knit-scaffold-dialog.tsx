@@ -31,6 +31,7 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
   const [getComponents, setGetComponents] = useState<Component[]>([{ name: '', description: '' }])
   const [setComponents, setSetComponents] = useState<Component[]>([{ name: '', description: '' }])
   const [otherComponents, setOtherComponents] = useState<Component[]>([])
+  const [useAI, setUseAI] = useState(false)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -280,6 +281,28 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* AI Code Generation Option */}
+          <div className="border-t pt-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="useAI"
+                checked={useAI}
+                onChange={(e) => setUseAI(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <Label htmlFor="useAI" className="cursor-pointer">
+                🤖 Generate implementation code with AI (Phase 3 - Coming Soon)
+              </Label>
+            </div>
+            {useAI && (
+              <p className="text-sm text-muted-foreground mt-2">
+                AI will generate production-ready Lua code based on your component descriptions.
+                Make sure to add detailed descriptions for better results!
+              </p>
+            )}
           </div>
 
           {/* Actions */}
