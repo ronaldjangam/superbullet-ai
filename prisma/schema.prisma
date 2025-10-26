@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String
+  name              String?
+  tokensRemaining   Int       @default(1000000)
+  subscriptionTier  String    @default("free")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  projects          Project[]
+  sessions          Session[]
+  accounts          Account[]
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  structure   Json?    // JSON structure of the entire file tree
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files       File[]
+  
+  @@index([userId])
+}
+
+model File {
+  id        String   @id @default(uuid())
+  projectId String
+  path      String   // Full path like "ServerScriptService/PlayerService/init.lua"
+  content   String   @db.Text
+  fileType  String   // "lua", "json", "txt", etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, path])
+  @@index([projectId])
+}
+
+model Template {
+  id            String   @id @default(uuid())
+  name          String
+  category      String   // "inventory", "shop", "quest", etc.
+  description   String   @db.Text
+  tags          String[]
+  files         Json     // Array of TemplateFile objects
+  documentation String   @db.Text
+  usageCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([category])
+}
+
+model MarketplaceAsset {
+  id             String   @id @default(uuid())
+  authorId       String
+  name           String
+  type           String   // "model", "system", "ui", "vfx", "audio", "animation"
+  description    String   @db.Text
+  price          Decimal  @db.Decimal(10, 2)
+  rating         Decimal  @default(0) @db.Decimal(3, 2)
+  downloads      Int      @default(0)
+  files          Json     // Asset files
+  previewImages  String[]
+  documentation  String   @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([type])
+  @@index([authorId])
+}
