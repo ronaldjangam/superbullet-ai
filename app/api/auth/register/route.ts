@@ -8,8 +8,11 @@ export async function POST(request: Request) {
   try {
     const { email, password, name } = await request.json()
 
+    console.log('[Register] Received registration request for:', email)
+
     // Validate input
     if (!email || !password) {
+      console.log('[Register] Missing email or password')
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
@@ -17,11 +20,13 @@ export async function POST(request: Request) {
     }
 
     // Check if user already exists
+    console.log('[Register] Checking if user exists...')
     const existingUser = await prisma.user.findUnique({
       where: { email },
     })
 
     if (existingUser) {
+      console.log('[Register] User already exists:', email)
       return NextResponse.json(
         { error: 'User already exists' },
         { status: 400 }
@@ -29,9 +34,11 @@ export async function POST(request: Request) {
     }
 
     // Hash password
+    console.log('[Register] Hashing password...')
     const passwordHash = await hashPassword(password)
 
     // Create user
+    console.log('[Register] Creating user in database...')
     const user = await prisma.user.create({
       data: {
         email,
@@ -39,6 +46,8 @@ export async function POST(request: Request) {
         name: name || null,
       },
     })
+
+    console.log('[Register] User created successfully:', user.id)
 
     // Create token
     const token = await createToken({ userId: user.id, email: user.email })
@@ -53,9 +62,14 @@ export async function POST(request: Request) {
       token,
     })
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error('[Register] Registration error:', error)
+    console.error('[Register] Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
