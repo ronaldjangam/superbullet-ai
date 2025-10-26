@@ -6,6 +6,7 @@ import { FileNode } from '@/lib/roblox-structure'
 import { CodeEditor } from '@/components/editor/code-editor'
 import { FileTree } from '@/components/editor/file-tree'
 import { EditorTabs, EditorTab } from '@/components/editor/editor-tabs'
+import { KnitScaffoldDialog } from '@/components/knit-scaffold-dialog'
 import { Button } from '@/components/ui/button'
 import { Save, Play, Settings, Menu } from 'lucide-react'
 
@@ -245,6 +246,7 @@ export default function IDEPage() {
           <h1 className="font-semibold">{project.name}</h1>
         </div>
         <div className="flex items-center gap-2">
+          <KnitScaffoldDialog projectId={projectId} onServiceCreated={fetchProject} />
           <Button variant="ghost" size="sm" onClick={handleSave} disabled={saving || !activeTab}>
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving...' : 'Save'}
