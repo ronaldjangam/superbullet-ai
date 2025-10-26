@@ -1,0 +1,14 @@
+IMPORTANT: Use this exact DATABASE_URL in Vercel dashboard:
+
+postgresql://postgres:XjoI3NpUVnSmyRPG@db.iexpnkwvghwdpxfvvxli.supabase.co:6543/postgres?pgbouncer=true
+
+Key changes from original:
+1. Port changed from 5432 to 6543 (Supabase's connection pooler)
+2. Added ?pgbouncer=true parameter for serverless compatibility
+
+Steps to fix:
+1. Go to: https://vercel.com/jangamronaldgospel-gmailcoms-projects/superbullet-ai/settings/environment-variables
+2. Find DATABASE_URL and click Edit
+3. Replace the value with the above URL (copy exactly)
+4. Save
+5. Redeploy the application
