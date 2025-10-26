@@ -122,33 +122,56 @@ export async function POST(request: Request) {
 /**
  * Update project structure with new files
  */
-function updateProjectStructure(structure: any, files: Array<{ path: string }>) {
-  const updated = { ...structure }
+function updateProjectStructure(structure: any, files: Array<{ path: string; fileType: string }>) {
+  // Start with existing structure or create a copy
+  const updated = JSON.parse(JSON.stringify(structure))
 
   files.forEach(file => {
     const parts = file.path.split('/')
-    let current = updated
-
-    parts.forEach((part, index) => {
-      if (index === parts.length - 1) {
-        // File node
-        if (!current.children) current.children = {}
-        current.children[part] = {
-          type: 'file',
-          path: file.path,
-        }
-      } else {
-        // Folder node
-        if (!current.children) current.children = {}
-        if (!current.children[part]) {
-          current.children[part] = {
-            type: 'folder',
-            children: {},
-          }
-        }
-        current = current.children[part]
+    
+    // Find or create the root folder (e.g., "ReplicatedStorage")
+    const rootFolderName = parts[0]
+    if (!updated[rootFolderName]) {
+      updated[rootFolderName] = {
+        id: rootFolderName.toLowerCase().replace(/\s+/g, '-'),
+        name: rootFolderName,
+        type: 'folder',
+        path: rootFolderName,
+        children: [],
       }
-    })
+    }
+
+    // Navigate/create nested structure
+    let currentNode = updated[rootFolderName]
+    
+    for (let i = 1; i < parts.length; i++) {
+      const part = parts[i]
+      const isLastPart = i === parts.length - 1
+      const currentPath = parts.slice(0, i + 1).join('/')
+
+      if (!currentNode.children) {
+        currentNode.children = []
+      }
+
+      // Find existing child
+      let childNode = currentNode.children.find((child: any) => child.name === part)
+
+      if (!childNode) {
+        // Create new node
+        childNode = {
+          id: currentPath.toLowerCase().replace(/[/\s]+/g, '-'),
+          name: part,
+          type: isLastPart ? 'file' : 'folder',
+          path: currentPath,
+          children: isLastPart ? undefined : [],
+        }
+        currentNode.children.push(childNode)
+      }
+
+      if (!isLastPart) {
+        currentNode = childNode
+      }
+    }
   })
 
   return updated
