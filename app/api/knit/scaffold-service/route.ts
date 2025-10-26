@@ -53,18 +53,42 @@ export async function POST(request: Request) {
     // Create files in database
     console.log('[Scaffold API] Creating files in database...')
     const createdFiles = await Promise.all(
-      generatedFiles.map(file =>
-        prisma.file.create({
-          data: {
-            projectId,
-            path: file.path,
-            content: file.content,
-            fileType: file.fileType,
+      generatedFiles.map(async (file) => {
+        // Check if file already exists
+        const existingFile = await prisma.file.findUnique({
+          where: {
+            projectId_path: {
+              projectId,
+              path: file.path,
+            },
           },
         })
-      )
+
+        if (existingFile) {
+          // Update existing file
+          console.log('[Scaffold API] Updating existing file:', file.path)
+          return prisma.file.update({
+            where: { id: existingFile.id },
+            data: {
+              content: file.content,
+              fileType: file.fileType,
+            },
+          })
+        } else {
+          // Create new file
+          console.log('[Scaffold API] Creating new file:', file.path)
+          return prisma.file.create({
+            data: {
+              projectId,
+              path: file.path,
+              content: file.content,
+              fileType: file.fileType,
+            },
+          })
+        }
+      })
     )
-    console.log('[Scaffold API] Created', createdFiles.length, 'files in database')
+    console.log('[Scaffold API] Created/updated', createdFiles.length, 'files in database')
 
     // Update project structure
     console.log('[Scaffold API] Updating project structure...')
