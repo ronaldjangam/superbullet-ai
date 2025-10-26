@@ -4,6 +4,8 @@ import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { DEFAULT_ROBLOX_STRUCTURE } from '@/lib/roblox-structure'
 
+export const dynamic = 'force-dynamic'
+
 async function getUserFromToken() {
   const headersList = headers()
   const authorization = headersList.get('authorization')
