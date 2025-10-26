@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         userId: user.userId,
         name,
         description: description || null,
-        structure: DEFAULT_ROBLOX_STRUCTURE,
+        structure: DEFAULT_ROBLOX_STRUCTURE as any,
       },
     })
 
