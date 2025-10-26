@@ -113,9 +113,15 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
         throw new Error(data.error || 'Failed to scaffold service')
       }
 
+      // Calculate total components
+      const totalComponents = 
+        getComponents.filter(c => c.name.trim()).length +
+        setComponents.filter(c => c.name.trim()).length +
+        otherComponents.filter(c => c.name.trim()).length
+
       toast({
-        title: 'Service created!',
-        description: data.message,
+        title: '✅ Service Created Successfully!',
+        description: `${serviceName} with ${totalComponents} components (${data.files?.length || 0} files generated)`,
       })
 
       setOpen(false)
@@ -129,7 +135,7 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
     } catch (error) {
       console.error('[Knit Scaffold] Error:', error)
       toast({
-        title: 'Error',
+        title: '❌ Error Creating Service',
         description: error instanceof Error ? error.message : 'Failed to create service',
         variant: 'destructive',
       })
