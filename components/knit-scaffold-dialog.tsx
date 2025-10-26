@@ -71,7 +71,11 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
   }
 
   const handleScaffold = async () => {
+    console.log('[Knit Scaffold] Starting scaffold process...')
+    console.log('[Knit Scaffold] Service name:', serviceName)
+    
     if (!serviceName.trim()) {
+      console.log('[Knit Scaffold] Service name is empty')
       toast({
         title: 'Service name required',
         description: 'Please enter a service name',
@@ -82,21 +86,28 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
 
     setLoading(true)
     try {
+      const payload = {
+        projectId,
+        serviceName,
+        components: {
+          get: getComponents.filter(c => c.name.trim()),
+          set: setComponents.filter(c => c.name.trim()),
+          others: otherComponents.filter(c => c.name.trim()),
+        },
+      }
+      
+      console.log('[Knit Scaffold] Sending request with payload:', payload)
+      
       const response = await fetch('/api/knit/scaffold-service', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectId,
-          serviceName,
-          components: {
-            get: getComponents.filter(c => c.name.trim()),
-            set: setComponents.filter(c => c.name.trim()),
-            others: otherComponents.filter(c => c.name.trim()),
-          },
-        }),
+        body: JSON.stringify(payload),
       })
 
+      console.log('[Knit Scaffold] Response status:', response.status)
+      
       const data = await response.json()
+      console.log('[Knit Scaffold] Response data:', data)
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to scaffold service')
@@ -113,8 +124,10 @@ export function KnitScaffoldDialog({ projectId, onServiceCreated }: KnitScaffold
       setSetComponents([{ name: '', description: '' }])
       setOtherComponents([])
       
+      console.log('[Knit Scaffold] Calling onServiceCreated callback')
       onServiceCreated?.()
     } catch (error) {
+      console.error('[Knit Scaffold] Error:', error)
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to create service',
