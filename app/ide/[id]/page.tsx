@@ -293,6 +293,10 @@ export default function IDEPage() {
                   onChange={handleEditorChange}
                   language="lua"
                   path={openTabs.find(t => t.id === activeTab)?.path}
+                  projectFiles={project?.files.map(f => ({
+                    path: f.path,
+                    content: f.content
+                  })) || []}
                 />
               </div>
             </>
