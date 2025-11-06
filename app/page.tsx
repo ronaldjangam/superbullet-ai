@@ -15,8 +15,7 @@ export default function Home() {
               AI-Powered Roblox Development Platform
             </p>
             <p className="mx-auto max-w-[600px] text-sm text-muted-foreground">
-              Build Roblox games 10x faster with our custom fine-tuned AI model,
-              production-ready templates, and modified Knit framework.
+              Rajesh's AI-powered Roblox development platform
             </p>
           </div>
           
